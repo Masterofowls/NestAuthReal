@@ -1,0 +1,78 @@
+CREATE TABLE "passkey" (
+	"id" text PRIMARY KEY NOT NULL,
+	"name" text,
+	"public_key" text NOT NULL,
+	"user_id" text NOT NULL,
+	"credential_id" text NOT NULL,
+	"counter" integer NOT NULL,
+	"device_type" text NOT NULL,
+	"backed_up" boolean NOT NULL,
+	"transports" text,
+	"created_at" timestamp,
+	"aaguid" text
+);
+--> statement-breakpoint
+ALTER TABLE "verification" DROP CONSTRAINT "verification_token_unique";--> statement-breakpoint
+ALTER TABLE "account" DROP CONSTRAINT "account_userId_user_id_fk";
+--> statement-breakpoint
+ALTER TABLE "session" DROP CONSTRAINT "session_userId_user_id_fk";
+--> statement-breakpoint
+ALTER TABLE "user" ALTER COLUMN "name" SET NOT NULL;--> statement-breakpoint
+ALTER TABLE "account" ADD COLUMN "account_id" text NOT NULL;--> statement-breakpoint
+ALTER TABLE "account" ADD COLUMN "provider_id" text NOT NULL;--> statement-breakpoint
+ALTER TABLE "account" ADD COLUMN "user_id" text NOT NULL;--> statement-breakpoint
+ALTER TABLE "account" ADD COLUMN "access_token" text;--> statement-breakpoint
+ALTER TABLE "account" ADD COLUMN "refresh_token" text;--> statement-breakpoint
+ALTER TABLE "account" ADD COLUMN "id_token" text;--> statement-breakpoint
+ALTER TABLE "account" ADD COLUMN "access_token_expires_at" timestamp;--> statement-breakpoint
+ALTER TABLE "account" ADD COLUMN "refresh_token_expires_at" timestamp;--> statement-breakpoint
+ALTER TABLE "account" ADD COLUMN "password" text;--> statement-breakpoint
+ALTER TABLE "account" ADD COLUMN "created_at" timestamp DEFAULT now() NOT NULL;--> statement-breakpoint
+ALTER TABLE "account" ADD COLUMN "updated_at" timestamp NOT NULL;--> statement-breakpoint
+ALTER TABLE "session" ADD COLUMN "expires_at" timestamp NOT NULL;--> statement-breakpoint
+ALTER TABLE "session" ADD COLUMN "created_at" timestamp DEFAULT now() NOT NULL;--> statement-breakpoint
+ALTER TABLE "session" ADD COLUMN "updated_at" timestamp NOT NULL;--> statement-breakpoint
+ALTER TABLE "session" ADD COLUMN "ip_address" text;--> statement-breakpoint
+ALTER TABLE "session" ADD COLUMN "user_agent" text;--> statement-breakpoint
+ALTER TABLE "session" ADD COLUMN "user_id" text NOT NULL;--> statement-breakpoint
+ALTER TABLE "session" ADD COLUMN "impersonated_by" text;--> statement-breakpoint
+ALTER TABLE "user" ADD COLUMN "email_verified" boolean DEFAULT false NOT NULL;--> statement-breakpoint
+ALTER TABLE "user" ADD COLUMN "created_at" timestamp DEFAULT now() NOT NULL;--> statement-breakpoint
+ALTER TABLE "user" ADD COLUMN "updated_at" timestamp DEFAULT now() NOT NULL;--> statement-breakpoint
+ALTER TABLE "user" ADD COLUMN "role" text;--> statement-breakpoint
+ALTER TABLE "user" ADD COLUMN "banned" boolean DEFAULT false;--> statement-breakpoint
+ALTER TABLE "user" ADD COLUMN "ban_reason" text;--> statement-breakpoint
+ALTER TABLE "user" ADD COLUMN "ban_expires" timestamp;--> statement-breakpoint
+ALTER TABLE "verification" ADD COLUMN "value" text NOT NULL;--> statement-breakpoint
+ALTER TABLE "verification" ADD COLUMN "expires_at" timestamp NOT NULL;--> statement-breakpoint
+ALTER TABLE "verification" ADD COLUMN "created_at" timestamp DEFAULT now() NOT NULL;--> statement-breakpoint
+ALTER TABLE "verification" ADD COLUMN "updated_at" timestamp DEFAULT now() NOT NULL;--> statement-breakpoint
+ALTER TABLE "passkey" ADD CONSTRAINT "passkey_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+CREATE INDEX "passkey_userId_idx" ON "passkey" USING btree ("user_id");--> statement-breakpoint
+CREATE INDEX "passkey_credentialID_idx" ON "passkey" USING btree ("credential_id");--> statement-breakpoint
+ALTER TABLE "account" ADD CONSTRAINT "account_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "session" ADD CONSTRAINT "session_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+CREATE INDEX "account_userId_idx" ON "account" USING btree ("user_id");--> statement-breakpoint
+CREATE INDEX "session_userId_idx" ON "session" USING btree ("user_id");--> statement-breakpoint
+CREATE INDEX "verification_identifier_idx" ON "verification" USING btree ("identifier");--> statement-breakpoint
+ALTER TABLE "account" DROP COLUMN "userId";--> statement-breakpoint
+ALTER TABLE "account" DROP COLUMN "type";--> statement-breakpoint
+ALTER TABLE "account" DROP COLUMN "provider";--> statement-breakpoint
+ALTER TABLE "account" DROP COLUMN "providerAccountId";--> statement-breakpoint
+ALTER TABLE "account" DROP COLUMN "refreshToken";--> statement-breakpoint
+ALTER TABLE "account" DROP COLUMN "accessToken";--> statement-breakpoint
+ALTER TABLE "account" DROP COLUMN "expiresAt";--> statement-breakpoint
+ALTER TABLE "account" DROP COLUMN "tokenType";--> statement-breakpoint
+ALTER TABLE "account" DROP COLUMN "idToken";--> statement-breakpoint
+ALTER TABLE "account" DROP COLUMN "sessionState";--> statement-breakpoint
+ALTER TABLE "session" DROP COLUMN "userId";--> statement-breakpoint
+ALTER TABLE "session" DROP COLUMN "expiresAt";--> statement-breakpoint
+ALTER TABLE "session" DROP COLUMN "createdAt";--> statement-breakpoint
+ALTER TABLE "session" DROP COLUMN "updatedAt";--> statement-breakpoint
+ALTER TABLE "user" DROP COLUMN "emailVerified";--> statement-breakpoint
+ALTER TABLE "user" DROP COLUMN "createdAt";--> statement-breakpoint
+ALTER TABLE "user" DROP COLUMN "updatedAt";--> statement-breakpoint
+ALTER TABLE "verification" DROP COLUMN "token";--> statement-breakpoint
+ALTER TABLE "verification" DROP COLUMN "expiresAt";--> statement-breakpoint
+ALTER TABLE "verification" DROP COLUMN "createdAt";--> statement-breakpoint
+ALTER TABLE "verification" DROP COLUMN "updatedAt";
