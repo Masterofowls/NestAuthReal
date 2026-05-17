@@ -5,6 +5,7 @@ import { passkey } from '@better-auth/passkey';
 import { admin, bearer, lastLoginMethod, jwt } from 'better-auth/plugins';
 import { deviceAuthorization } from 'better-auth/plugins';
 import { i18n } from '@better-auth/i18n';
+import { electron } from '@better-auth/electron';
 import { db } from './db';
 import * as schema from '../src/db/schema';
 import { parseTrustedOrigins } from '../src/config/env';
@@ -50,6 +51,7 @@ export const auth = betterAuth({
   },
   socialProviders,
   plugins: [
+    electron(),
     jwt({
       jwks: {
         keyPairConfig: { alg: 'EdDSA' },

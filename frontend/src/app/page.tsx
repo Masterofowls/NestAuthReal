@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { use, useState, useEffect } from "react";
 import { authClient, useSession, signIn, signOut } from "@/lib/auth-client";
 import { createOAuthCallbackURL } from "@/lib/auth-env";
 
@@ -8,7 +8,12 @@ const oauthCallbackURL = createOAuthCallbackURL();
 
 type EmailMode = 'signIn' | 'signUp';
 
-export default function Home() {
+export default function Home({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | undefined>>;
+}) {
+  const query = use(searchParams);
   const { data: session, isPending } = useSession();
   const [busy, setBusy] = useState(false);
   const [lastMethod, setLastMethod] = useState<string | null>(null);
@@ -21,6 +26,9 @@ export default function Home() {
   useEffect(() => {
     const method = authClient.getLastUsedLoginMethod();
     setLastMethod(method ?? null);
+    // Allow the Electron client to claim the session after OAuth redirect
+    const id = authClient.ensureElectronRedirect();
+    return () => clearTimeout(id);
   }, [session]);
 
   const signInWithGoogle = async () => {
@@ -29,6 +37,7 @@ export default function Home() {
       await signIn.social({
         provider: "google",
         callbackURL: oauthCallbackURL,
+        fetchOptions: { query },
       });
     } finally {
       setBusy(false);
@@ -41,6 +50,7 @@ export default function Home() {
       await signIn.social({
         provider: "github",
         callbackURL: oauthCallbackURL,
+        fetchOptions: { query },
       });
     } finally {
       setBusy(false);
