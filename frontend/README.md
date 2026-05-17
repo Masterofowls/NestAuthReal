@@ -1,36 +1,67 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Frontend
 
-## Getting Started
+Next.js frontend for the NestAuth stack. It renders login UI and uses the
+Better Auth browser client for social and passkey flows.
 
-First, run the development server:
+## Stack
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+- Next.js 16
+- React 19
+- Better Auth React client
+- Passkey client plugin
+
+## Environment
+
+Copy `.env.example` to `.env` and adjust values:
+
+```powershell
+Copy-Item 'C:\Users\mrdan\NestAuth\frontend\.env.example' 'C:\Users\mrdan\NestAuth\frontend\.env'
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Variables:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- `NEXT_PUBLIC_AUTH_BASE_URL` auth server URL (backend)
+- `NEXT_PUBLIC_APP_URL` frontend public URL used for callback URL generation
+- `NEXT_PUBLIC_AUTH_BASE_PATH` auth route base path (default `/api/auth`)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Scripts
 
-## Learn More
+```powershell
+npm run dev
+npm run lint
+npm run build
+npm run start
+```
 
-To learn more about Next.js, take a look at the following resources:
+## Local Development
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+1. Start backend first on `http://localhost:3000`.
+2. Start frontend:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```powershell
+Set-Location 'C:\Users\mrdan\NestAuth\frontend'
+npm run dev
+```
 
-## Deploy on Vercel
+3. Open your app URL (usually `http://localhost:3001`).
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Auth Flow Notes
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- OAuth callback URL is derived from `NEXT_PUBLIC_APP_URL`.
+- Auth client base URL/path is derived from env and not hardcoded.
+- Rewrites proxy `NEXT_PUBLIC_AUTH_BASE_PATH` to backend auth routes.
+
+## Build Notes
+
+- `next build` can emit warnings if Google Fonts are unreachable on current
+	network/DNS.
+- Type checks are strict; run `npx tsc --noEmit` to verify TS errors quickly.
+
+## Deploy (Vercel)
+
+```powershell
+Set-Location 'C:\Users\mrdan\NestAuth\frontend'
+vercel deploy --prod
+```
+
+Set the same env vars in Vercel project settings before deploying.
