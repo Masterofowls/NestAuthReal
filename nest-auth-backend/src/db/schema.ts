@@ -34,6 +34,7 @@ export const user = pgTable('user', {
   banned: boolean('banned').default(false),
   banReason: text('ban_reason'),
   banExpires: timestamp('ban_expires'),
+  lastLoginMethod: text('last_login_method'),
 });
 
 export const session = pgTable(
@@ -136,3 +137,12 @@ export const accountRelations = relations(account, ({ one }) => ({
 export const passkeyRelations = relations(passkey, ({ one }) => ({
   user: one(user, { fields: [passkey.userId], references: [user.id] }),
 }));
+
+// JWT JWKS table — required by better-auth jwt plugin
+export const jwks = pgTable('jwks', {
+  id: text('id').primaryKey(),
+  publicKey: text('public_key').notNull(),
+  privateKey: text('private_key').notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  expiresAt: timestamp('expires_at'),
+});

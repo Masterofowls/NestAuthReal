@@ -22,6 +22,20 @@
       "when": 1778903713148,
       "tag": "0002_bouncy_speed_demon",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1779013942910,
+      "tag": "0003_bouncy_luckman",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1779014393519,
+      "tag": "0004_add_jwks_table",
+      "breakpoints": true
     }
   ]
 }
