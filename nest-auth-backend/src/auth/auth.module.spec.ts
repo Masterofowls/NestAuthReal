@@ -33,7 +33,7 @@ describe('Auth Config', () => {
     it('should load BETTER_AUTH_SECRET from env', () => {
       const secret = configService.get<string>('BETTER_AUTH_SECRET');
       expect(secret).toBeDefined();
-      expect(secret!.length).toBeGreaterThanOrEqual(32); 
+      expect(secret!.length).toBeGreaterThanOrEqual(32);
     });
 
     it('should have OAuth env vars ready', () => {

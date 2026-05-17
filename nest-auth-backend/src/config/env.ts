@@ -14,6 +14,9 @@ const envSchema = z.object({
   DATABASE_URL: z.string().min(1),
   BETTER_AUTH_SECRET: z.string().min(32),
   BETTER_AUTH_URL: z.string().url(),
+  AUTH_TRUSTED_ORIGINS: z.string().default('http://localhost:3001'),
+  PASSKEY_RP_ID: z.string().default('localhost'),
+  PASSKEY_RP_NAME: z.string().default('NestAuth'),
   GOOGLE_CLIENT_ID: emptyToUndefined(z.string()),
   GOOGLE_CLIENT_SECRET: emptyToUndefined(z.string()),
   GITHUB_CLIENT_ID: emptyToUndefined(z.string()),
@@ -30,4 +33,11 @@ export const validateEnv = (config: Record<string, unknown>) => {
     );
   }
   return parsed.data;
+};
+
+export const parseTrustedOrigins = (value: string): string[] => {
+  return value
+    .split(',')
+    .map((origin) => origin.trim())
+    .filter(Boolean);
 };
