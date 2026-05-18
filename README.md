@@ -110,6 +110,97 @@ Open `http://localhost:3001` (or your active Next.js dev port).
 | `lastLoginMethodClient` | `better-auth/client/plugins` |
 | `jwtClient` | `better-auth/client/plugins` |
 
+## Working Auth Logic (Current)
+
+This is the current end-to-end behavior implemented in this workspace.
+
+### Frontend auth routing model
+
+- Frontend auth client uses `NEXT_PUBLIC_APP_URL` as `baseURL` so auth requests
+  stay same-origin with the frontend and go through Next.js rewrites.
+- Next.js rewrites forward `/api/auth/:path*` to
+  `NEXT_PUBLIC_AUTH_BASE_URL + NEXT_PUBLIC_AUTH_BASE_PATH`.
+- This avoids cross-origin browser auth calls and keeps cookie behavior stable.
+
+### Backend auth mounting model
+
+- Better Auth is mounted at `/api/auth` by
+  `@thallesp/nestjs-better-auth` in NestJS.
+- Email/password, OAuth, passkey, JWT, bearer, admin, i18n, and device
+  authorization all run under this base path.
+
+### OAuth logic (Google and GitHub)
+
+- Provider callback URL is generated from backend `BETTER_AUTH_URL`:
+  `/api/auth/callback/google` and `/api/auth/callback/github`.
+- Providers are enabled only when both client ID and client secret exist.
+- Frontend starts OAuth via Better Auth client with callback URL derived from
+  `NEXT_PUBLIC_APP_URL`.
+
+### Passkey logic (WebAuthn)
+
+- Backend plugin: `passkey({ rpID, rpName })` from env.
+- Frontend plugin: `passkeyClient()`.
+- Sign-in flow uses `authClient.signIn.passkey()`.
+- Registration flow (add passkey) uses
+  `authClient.passkey.addPasskey({ authenticatorAttachment: 'platform' })`.
+- `addPasskey` requires an authenticated session; passkey sign-in does not.
+
+Passkey env rule that must be correct in production:
+
+- `PASSKEY_RP_ID` must match the frontend host where WebAuthn runs.
+  Example for current deployment:
+  `frontend-five-gold-zmyppyq06g.vercel.app`
+- Do not set `PASSKEY_RP_ID` to the backend host.
+
+### Device authorization logic
+
+- Backend includes `deviceAuthorization({ verificationUri: '/device', schema: {} })`.
+- Frontend includes `deviceAuthorizationClient()` and exposes the
+  `/device` verification UI flow.
+- `schema: {}` is intentionally required in this project and must not be removed.
+
+## Production Deployment Status
+
+- Frontend: `https://frontend-five-gold-zmyppyq06g.vercel.app`
+- Backend: `https://nest-auth-backend.fly.dev`
+- Auth base path: `/api/auth`
+
+Working in production:
+
+- Email/password sign-up and sign-in
+- Google OAuth sign-in
+- GitHub OAuth sign-in
+- Passkey registration and passkey sign-in
+- Device authorization flow
+
+## Production Env Reference
+
+### Frontend
+
+- `NEXT_PUBLIC_AUTH_BASE_URL=https://nest-auth-backend.fly.dev`
+- `NEXT_PUBLIC_APP_URL=https://frontend-five-gold-zmyppyq06g.vercel.app`
+- `NEXT_PUBLIC_AUTH_BASE_PATH=/api/auth`
+
+### Backend
+
+- `BETTER_AUTH_URL=https://frontend-five-gold-zmyppyq06g.vercel.app`
+- `AUTH_TRUSTED_ORIGINS` includes frontend origin (and desktop scheme if used)
+- `PASSKEY_RP_ID=frontend-five-gold-zmyppyq06g.vercel.app`
+- `PASSKEY_RP_NAME=NestAuth`
+
+## Quick Verification Checks
+
+Use these checks after deployment changes:
+
+```powershell
+# Passkey route should not return 404
+curl.exe -i "https://nest-auth-backend.fly.dev/api/auth/passkey/generate-register-options"
+
+# Non-existent auth route should return Better Auth 404
+curl.exe -i "https://nest-auth-backend.fly.dev/api/auth/nonexistent-route"
+```
+
 ## Testing
 
 A separate test-only auth instance lives at
