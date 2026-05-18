@@ -4,18 +4,20 @@ const node_path = require("node:path");
 const client = require("better-auth/client");
 const client$1 = require("@better-auth/electron/client");
 const storage = require("@better-auth/electron/storage");
+const AUTH_URL = process.env["BETTER_AUTH_URL"] ?? "http://localhost:3001";
 const authClient = client.createAuthClient({
-  baseURL: process.env["BETTER_AUTH_BACKEND_URL"] ?? "http://localhost:3000",
+  baseURL: AUTH_URL,
   basePath: "/api/auth",
   plugins: [
     client$1.electronClient({
-      // The Next.js page that calls ensureElectronRedirect()
-      signInURL: process.env["BETTER_AUTH_SIGN_IN_URL"] ?? "http://localhost:3001",
+      // Same origin as baseURL — the Next.js page that calls
+      // ensureElectronRedirect() after sign-in completes.
+      signInURL: AUTH_URL,
       protocol: {
-        // Must match trustedOrigins in the backend and electronProxyClient
+        // Must match trustedOrigins in the backend and electronProxyClient.
         scheme: "com.example.nestauth"
       },
-      // Default conf-based storage persisted in userData directory
+      // Persisted token storage in the Electron userData directory.
       storage: storage.storage()
     })
   ]
@@ -24,13 +26,13 @@ authClient.setupMain();
 electron.ipcMain.handle(
   "better-auth:request-auth",
   async (_, opts) => {
-    const signInURL = new URL(
-      process.env["BETTER_AUTH_SIGN_IN_URL"] ?? "http://localhost:3001"
+    const url = new URL(
+      process.env["BETTER_AUTH_URL"] ?? "http://localhost:3001"
     );
     if (opts?.provider) {
-      signInURL.searchParams.set("provider", opts.provider);
+      url.searchParams.set("provider", opts.provider);
     }
-    await electron.shell.openExternal(signInURL.toString());
+    await electron.shell.openExternal(url.toString());
   }
 );
 function createWindow() {
