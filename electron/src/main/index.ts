@@ -1,26 +1,11 @@
-import { app, BrowserWindow, ipcMain, shell } from 'electron';
+import { app, BrowserWindow } from 'electron';
 import { join } from 'node:path';
 import { authClient } from './lib/auth-client';
 
 // MUST be called before app.whenReady() to register the protocol handler,
-// user-image proxy, CSP headers, and IPC bridges.
+// user-image proxy, CSP headers, and IPC bridges (including better-auth:requestAuth
+// which opens the frontend PKCE sign-in URL with code_challenge + state).
 authClient.setupMain();
-
-// Custom IPC handler: renderer requests the main process to open the
-// frontend sign-in page in the user's default browser.
-// ?provider=google|github triggers the OAuth flow immediately on that page.
-ipcMain.handle(
-  'better-auth:request-auth',
-  async (_, opts?: { provider?: string }) => {
-    const url = new URL(
-      process.env['BETTER_AUTH_URL'] ?? 'http://localhost:3001',
-    );
-    if (opts?.provider) {
-      url.searchParams.set('provider', opts.provider);
-    }
-    await shell.openExternal(url.toString());
-  },
-);
 
 function createWindow(): void {
   const win = new BrowserWindow({

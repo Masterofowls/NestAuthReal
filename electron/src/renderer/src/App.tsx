@@ -233,13 +233,14 @@ export default function App() {
   // ── Handlers ────────────────────────────────────────────────────────────
   const handleRequestAuth = (provider?: string) => {
     setRequestedAuth(true);
-    if (provider) {
-      window.requestAuth({ provider });
-      addLog('info', `Opening browser for ${provider} sign-in…`);
-    } else {
-      window.requestAuth();
-      addLog('info', 'Opening browser for sign-in…');
-    }
+    // Always open the frontend PKCE sign-in URL (no provider arg) so all
+    // auth methods — email, Google, GitHub, passkey — flow through the same
+    // page and complete via ensureElectronRedirect().
+    // Passing provider would route through init-oauth-proxy (backend-direct),
+    // bypassing the frontend and breaking the PKCE exchange.
+    const label = provider ? `${provider} ` : '';
+    window.requestAuth();
+    addLog('info', `Opening browser for ${label}sign-in…`);
   };
 
   const handleSignOut = async () => {

@@ -1,13 +1,10 @@
-import { contextBridge, ipcRenderer } from 'electron';
 import { setupRenderer } from '@better-auth/electron/preload';
 
 // Sets up the @better-auth/electron IPC bridges:
-// getUser, signOut, authenticate, onAuthenticated, onAuthError, onUserUpdated
+// window.getUser, window.requestAuth, window.signOut, window.authenticate,
+// window.onAuthenticated, window.onAuthError, window.onUserUpdated
+//
+// window.requestAuth() opens the frontend PKCE sign-in URL (signInURL +
+// code_challenge + state). All auth methods — email, OAuth, passkey — flow
+// through the frontend, completing via ensureElectronRedirect() on that page.
 setupRenderer();
-
-// Custom bridge: renderer triggers main to open the sign-in URL in a browser.
-contextBridge.exposeInMainWorld(
-  'requestAuth',
-  (opts?: { provider?: string }) =>
-    ipcRenderer.invoke('better-auth:request-auth', opts),
-);

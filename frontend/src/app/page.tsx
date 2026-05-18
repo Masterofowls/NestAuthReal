@@ -90,7 +90,7 @@ export default function Home({
   const signInWithPasskey = async () => {
     setBusy(true);
     try {
-      const res = await authClient.signIn.passkey();
+      const res = await authClient.signIn.passkey({ fetchOptions: { query } });
 
       if (res.error) {
         const errorCode = 'code' in res.error ? res.error.code : 'ERROR';
@@ -128,7 +128,7 @@ export default function Home({
 
     try {
       if (emailMode === 'signIn') {
-        const res = await signIn.email({ email, password });
+        const res = await signIn.email({ email, password, fetchOptions: { query } });
         if (res.error) {
           setEmailError(res.error.message ?? 'Sign-in failed');
         }
@@ -137,6 +137,7 @@ export default function Home({
           email,
           password,
           name,
+          fetchOptions: { query },
         });
         if (res.error) {
           setEmailError(res.error.message ?? 'Sign-up failed');
