@@ -5,25 +5,28 @@ import { storage } from '@better-auth/electron/storage';
 /**
  * Auth client for the Electron main process.
  *
- * baseURL   → NestAuth backend  (http://localhost:3000)
- * signInURL → Next.js frontend  (http://localhost:3001)
+ * Both baseURL and signInURL point at the frontend so every auth request
+ * travels through the same Next.js /api/auth rewrite proxy the browser
+ * frontend uses — no separate backend URL is needed.
  *
  * IMPORTANT: Never expose this client directly to the renderer process.
  * Use the IPC bridges set up by setupMain() / setupRenderer() instead.
  */
+const AUTH_URL = process.env['BETTER_AUTH_URL'] ?? 'http://localhost:3001';
+
 export const authClient = createAuthClient({
-  baseURL: process.env['BETTER_AUTH_BACKEND_URL'] ?? 'http://localhost:3000',
+  baseURL: AUTH_URL,
   basePath: '/api/auth',
   plugins: [
     electronClient({
-      // The Next.js page that calls ensureElectronRedirect()
-      signInURL:
-        process.env['BETTER_AUTH_SIGN_IN_URL'] ?? 'http://localhost:3001',
+      // Same origin as baseURL — the Next.js page that calls
+      // ensureElectronRedirect() after sign-in completes.
+      signInURL: AUTH_URL,
       protocol: {
-        // Must match trustedOrigins in the backend and electronProxyClient
+        // Must match trustedOrigins in the backend and electronProxyClient.
         scheme: 'com.example.nestauth',
       },
-      // Default conf-based storage persisted in userData directory
+      // Persisted token storage in the Electron userData directory.
       storage: storage(),
     }),
   ],

@@ -7,17 +7,18 @@ import { authClient } from './lib/auth-client';
 authClient.setupMain();
 
 // Custom IPC handler: renderer requests the main process to open the
-// sign-in URL in the user's default browser.
+// frontend sign-in page in the user's default browser.
+// ?provider=google|github triggers the OAuth flow immediately on that page.
 ipcMain.handle(
   'better-auth:request-auth',
   async (_, opts?: { provider?: string }) => {
-    const signInURL = new URL(
-      process.env['BETTER_AUTH_SIGN_IN_URL'] ?? 'http://localhost:3001',
+    const url = new URL(
+      process.env['BETTER_AUTH_URL'] ?? 'http://localhost:3001',
     );
     if (opts?.provider) {
-      signInURL.searchParams.set('provider', opts.provider);
+      url.searchParams.set('provider', opts.provider);
     }
-    await shell.openExternal(signInURL.toString());
+    await shell.openExternal(url.toString());
   },
 );
 
